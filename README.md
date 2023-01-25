@@ -1,3 +1,5 @@
+[![Go](https://github.com/farrukhny/config/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/farrukhny/config/actions/workflows/go.yml)
+
 # Config
 
 Package config implements decoding environment variables and command line flags.
@@ -63,6 +65,7 @@ func main() {
 
 _**Command line flag will overwrite value from any source, it will be the highest priority._**
 
+
 ### Environment Variables
 
 `env` tag is used to specify environment variables name. If `env` tag is not specified, the struct key name will be used
@@ -106,6 +109,7 @@ func main() {
 }
 ```
 
+
 ### Command Line Flags
 
 `flag` tag is used to specify command line flag name. If `flag` tag is not specified, the struct key name will be used
@@ -130,6 +134,7 @@ func main() {
 
 ```
 
+
 ### Default Value
 
 `default` tag is used to specify default value. If `default` tag is not specified, the default value will be nil.
@@ -145,6 +150,7 @@ func main() {
     fmt.Println(c.FooBar) // foo
 }
 ```
+
 
 ### Required Value
 
@@ -163,6 +169,7 @@ func main() {
 }
 ```
 
+
 ### Default Value and Required Value Conflict
 
 Both `default` and `required` tags can not be specified for the same struct field. Error will be returned if both tags are specified.
@@ -178,6 +185,7 @@ func main() {
     fmt.Println(err) // default value and required value can't be specified at the same time
 }
 ```
+
 
 ### Mask Value
 
@@ -209,6 +217,7 @@ func main() {
 }
 ```
 
+
 ### Usage
 
 `Usage` tag is used to specify usage of config.
@@ -224,6 +233,7 @@ func main() {
     fmt.Println(c.FooBar) // foo bar
 }
 ```
+
 
 ### Decoder interface
 
@@ -262,6 +272,7 @@ func main() {
 
 ```
 
+
 ### Parser interface
 `Parser` interface is used to implement custom parser. `Parser` interface has one method `Parse` which accepts `interface{}` and  return `error`.
 Parser can be used to implement unmarshalling for different types. For example, YAML, TOML, JSON, etc.
@@ -290,6 +301,7 @@ func func main() {
 }
 
 ```
+
 
 ### Mutator of value
 
