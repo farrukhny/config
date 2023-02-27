@@ -13,17 +13,18 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [1.20]
+
     steps:
     - uses: actions/checkout@v3
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.20
-      run: export GOPATH=$HOME/go
-
+        go-version: ${{ matrix.go-version }}
     - name: Get dependencies
-      run: go get -v ./...
+      run: go get .
 
     - name: Lint
       run: go vet ./...
