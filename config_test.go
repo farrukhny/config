@@ -1,34 +1,17 @@
 package config_test
 
 import (
-	"github.com/farrukhny/config"
-	"github.com/google/go-cmp/cmp"
 	"os"
 	"testing"
+
+	"github.com/farrukhny/config"
+	"github.com/google/go-cmp/cmp"
 )
 
 const (
 	success = "\u2713"
 	failed  = "\u2717"
 )
-
-// TODO:
-// 1. Add test case for TestProcess function (see above)
-// 1.1 Test case for envs
-// 1.2 Test case for args
-// 1.3 Test case for both envs and args
-// 1.4 Test case for both envs and args with empty prefix
-// 1.5 Test case for both envs and args with prefix
-// 1.6 Test with mutator function
-// 2. Add test case for TestProcessWithParser function (see above)
-// 2.1 Test case for envs
-// 2.2 Test case for args
-// 2.3 Test case for both envs and args
-// 2.4 Test case for both envs and args with empty prefix
-// 2.5 Test case for both envs and args with prefix
-// 2.6 Test with mutator function
-// 2.7 Test parsers with empty parsers
-// 2.8 Test parsers with one parser
 
 // conf is the struct that will be used to test the conf package.
 type conf struct {

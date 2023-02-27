@@ -1,6 +1,7 @@
+# Config
+
 [![Go](https://github.com/farrukhny/config/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/farrukhny/config/actions/workflows/go.yml)
 
-# Config
 
 Package config implements decoding environment variables and command line flags.
 Package idiom is to use a struct to define the configuration options. 
@@ -303,7 +304,7 @@ func func main() {
 ```
 
 
-### Mutator of value
+### MutatorFunc
 
 `MutatorFunc` is used to mutate value. `MutatorFunc` is a function which accepts key, value and returns mutated value and error.
 Mutator usefully when you need to mutate value before it will be processed. For example, you can get secret path and pull value from secret storage.

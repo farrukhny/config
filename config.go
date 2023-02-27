@@ -11,7 +11,7 @@ type Decoder interface {
 }
 
 // Parser declare behavior to extend the different parsers that
-// can be used to unmarshal conf.
+// can be used to unmarshal config.
 type Parser interface {
 	Parse(cfg interface{}) error
 }
@@ -26,7 +26,8 @@ type source interface {
 // MutatorFunc is a function that mutates a value of the key before it is set to the field.
 type MutatorFunc func(key, value string) (string, error)
 
-// Process processes the struct with environment variables and command line flags source.
+// Process processes the struct with environment variables and command line flags source. It also
+// accepts mutator function to mutate the value before it is set to the field.
 func Process(prefix string, cfg interface{}, mutator ...MutatorFunc) error {
 	var args []string
 	if len(os.Args) > 1 {
@@ -40,7 +41,6 @@ func Process(prefix string, cfg interface{}, mutator ...MutatorFunc) error {
 // it will process the struct with environment variables and command line flags source.
 // It also accepts mutator function to mutate the value before it is set to the field.
 func ProcessWithParser(prefix string, cfg interface{}, parsers []Parser, mutator ...MutatorFunc) error {
-	// command line arguments
 	var args []string
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
@@ -67,7 +67,6 @@ func processWithParser(cfg interface{}, parsers ...Parser) error {
 
 // processWithSource processes the Field with the given source and mutator.
 func processWithSource(f Field, source []source, mutator ...MutatorFunc) error {
-	// iterate over the sources
 	for _, src := range source {
 		if src == nil {
 			continue
@@ -107,7 +106,6 @@ func processWithSource(f Field, source []source, mutator ...MutatorFunc) error {
 // parseWithDefaultSource parses the struct with environment variables and command line flags source.
 // It also accepts mutator function to mutate the value before it is set to the field.
 func parseWithDefaultSource(prefix string, args []string, cfg interface{}, mutator ...MutatorFunc) error {
-	// create instance of flag source
 	flag, err := newFlagParser(args)
 	if err != nil {
 		return err
@@ -115,13 +113,11 @@ func parseWithDefaultSource(prefix string, args []string, cfg interface{}, mutat
 
 	sources := []source{newEnvSource(prefix), flag}
 
-	// extract the fields from the given struct
 	fields, err := extractFields(nil, cfg)
 	if err != nil {
 		return err
 	}
 
-	// iterate over the fields
 	for _, f := range fields {
 		// set the default value to the field if any
 		// and make sure not to override the value if already set by Parser
