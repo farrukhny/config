@@ -89,7 +89,7 @@ func processWithSource(f Field, source []source, mutator ...MutatorFunc) error {
 				var err error
 				val, err = m(f.Name, val)
 				if err != nil {
-					return err
+					return errors.New("error executing mutator: " + f.Name + ", error: " + err.Error())
 				}
 			}
 		}
