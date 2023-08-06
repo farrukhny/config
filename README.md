@@ -8,7 +8,7 @@ The config package provides functionality for loading and processing configurati
 To install the config package, use the following command:
 
 ```bash
-go get github.com/example/config
+go get github.com/farrukhny/config
 ```
 
 ## Usage
