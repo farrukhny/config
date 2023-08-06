@@ -79,7 +79,7 @@ func GenerateStartupMessage(cfg interface{}) (string, error) {
 	sb.WriteString(fmt.Sprintf("%s is starting up with the following configuration:\n", os.Args[0]))
 	for _, f := range cfgUsage {
 		val := valueToString(f.FieldValue)
-		sb.WriteString(fmt.Sprintf("--	%s: %v\n", f.Flag, maskString(val, f.Mask)))
+		sb.WriteString(fmt.Sprintf("--%s: %v\n", f.Flag, maskString(val, f.Mask)))
 
 	}
 
