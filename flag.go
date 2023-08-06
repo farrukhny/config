@@ -93,7 +93,7 @@ func newFlagParser(args []string) (source, error) {
 
 // Source will return the value of the key if found.
 func (f *flag) Source(field Field) (string, bool) {
-	var isBoolType = field.FieldType == reflect.Bool
+	var isBoolType = field.FieldValue.Kind() == reflect.Bool
 
 	if field.ShortFlag != 0 {
 		if val, ok := f.source(string(field.ShortFlag), isBoolType); ok {

@@ -1,8 +1,10 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"text/tabwriter"
 	"text/template"
@@ -14,47 +16,45 @@ var usageTemplate = `Usage: {{.AppName}} [options] [arguments]
 {{if .Description}}{{.Description}}{{end}}
 
 Options:
-{{- range .Field }}
-{{ if .ShortFlag }}{{ printf "\t -%c," .ShortFlag }}{{else}}{{ printf "\t " }}{{ end }}{{ if .Flag }}{{ printf "\t--%s" .Flag }}{{ end }}{{ if .EnvVar }}{{ printf "\t($%s)" .EnvVar }}{{else}}{{ printf "\t "}}{{ end }}{{ printf "\t%s" .FieldType }}{{ if .Required }}{{ if .Usage }}{{ printf "\t%s (required)" .Usage }}{{else}}{{ printf "\t(required)" }}{{ end }}{{else if .Default}}{{ if .Usage }}{{ printf "\t%s (default: %s)" .Usage .Default }}{{else}}{{ printf "\t(default: %s)" .Default }}{{ end }}{{else}}{{ printf "\t%s" .Usage }}{{end}}{{ end }}
-
+{{range .Field }}
+{{- if .ShortFlag }}
+	{{- printf "\t-%c," .ShortFlag }}
+{{- else}}
+	{{- printf "\t " }}
+{{- end }}
+{{- if .Flag }}
+	{{- printf "\t--%s | $%s %s" .Flag .EnvVar (formatFieldType .FieldValue) }}
+{{- end }}
+	{{- printf "\t%s" (formatField .Default .Usage .Required) }}
+{{ end }}
 Global Options:
-{{ printf "\t -h," }}{{ printf "\t--help" }}{{ printf "\tshow this help message" }}
-{{ printf "\t -v," }}{{ printf "\t--version" }}{{ printf "\tshow version" -}}
+	{{ printf "\t -h," }}{{ printf "\t--help" }}{{ printf "\tshow this help message" }}
+	{{ printf "\t -v," }}{{ printf "\t--version" }}{{ printf "\tshow version" }}
 `
 
-// PrintUsage will print the usage message. It will accept a conf struct and run extractFields on it.
-// It will then use Filed struct from extractFields to build the usage message with the usageTemplate.
-func PrintUsage(cfg interface{}) (string, error) {
+// GenerateUsageMessage generates the usage message.
+func GenerateUsageMessage(cfg interface{}) (string, error) {
 	usage, err := extractFields(nil, cfg)
 	if err != nil {
 		return "", err
 	}
 
+	funcMap := template.FuncMap{
+		"formatFieldType": formatFieldType,
+		"formatField":     formatField,
+	}
+
 	var sb strings.Builder
-	tmp, err := template.New("usage").Parse(usageTemplate)
-	if err != nil {
-		return "", err
-	}
-
 	w := tabwriter.NewWriter(&sb, 0, 0, 2, ' ', tabwriter.TabIndent)
-	defaultDescription := `This application is configured via the environment variables or command line flags.`
 
-	// if the conf struct has masked it will mask the default value
-	var fields []Field
-	for _, f := range usage {
-		f.Default = maskString(f.Default, f.Mask)
-
-		fields = append(fields, f)
-	}
-
-	err = tmp.Execute(w, struct {
+	err = template.Must(template.New("usage").Funcs(funcMap).Parse(usageTemplate)).Execute(w, struct {
 		AppName     string
 		Description string
 		Field       []Field
 	}{
 		AppName:     os.Args[0],
-		Description: defaultDescription,
-		Field:       fields,
+		Description: "Configure the application using environment variables and command line flags. See options below.",
+		Field:       usage,
 	})
 	if err != nil {
 		return "", err
@@ -68,9 +68,8 @@ func PrintUsage(cfg interface{}) (string, error) {
 	return sb.String(), nil
 }
 
-// PrintStartupMessage will print the startup message. It will accept a conf struct and run extractFields on it.
-// It will then use Filed struct from extractFields to build the startup message.
-func PrintStartupMessage(cfg interface{}) (string, error) {
+// GenerateStartupMessage generates the startup message.
+func GenerateStartupMessage(cfg interface{}) (string, error) {
 	cfgUsage, err := extractFields(nil, cfg)
 	if err != nil {
 		return "", err
@@ -79,24 +78,66 @@ func PrintStartupMessage(cfg interface{}) (string, error) {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("%s is starting up with the following configuration:\n", os.Args[0]))
 	for _, f := range cfgUsage {
-		sb.WriteString(fmt.Sprintf("--%s: %s\n", f.Flag, maskString(f.Default, f.Mask)))
+		val := valueToString(f.FieldValue)
+		sb.WriteString(fmt.Sprintf("--	%s: %v\n", f.Flag, maskString(val, f.Mask)))
+
 	}
 
 	return sb.String(), nil
 }
 
-// maskString will mask the string if the mask is set to true.
+// GenerateJSONStartupMessage generates the startup message in JSON format.
+func GenerateJSONStartupMessage(cfg interface{}) (string, error) {
+	cfgUsage, err := extractFields(nil, cfg)
+	if err != nil {
+		return "", err
+	}
+
+	startupMessage := make(map[string]interface{})
+	for _, f := range cfgUsage {
+		startupMessage[f.Flag] = maskString(valueToString(f.FieldValue), f.Mask)
+	}
+
+	jsonMsg, err := json.Marshal(startupMessage)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonMsg), nil
+}
+
+// maskString masks the string if the mask is set to true.
 func maskString(s string, mask bool) string {
-	// check if string is empty
-	if s == "" {
-		return ""
+	if mask && len(s) > 3 {
+		return strings.Repeat("*", len(s)-3) + s[len(s)-3:]
 	}
-
-	// check if mask is set
-	if mask {
-		msk := strings.Repeat("*", len(s))
-		return strings.Replace(s, s, msk, 1)
-	}
-
 	return s
+}
+
+// formatField formats the field information into a single string.
+func formatField(defaultValue, usage string, required bool) string {
+	var value string
+	if required {
+		value = "(required)"
+	}
+
+	if defaultValue != "" {
+		value = fmt.Sprintf("(default: %s)", defaultValue)
+	}
+
+	if usage != "" {
+		return fmt.Sprintf("%s %s", usage, value)
+	}
+
+	return value
+}
+
+// formatFieldType formats the field type into a single human-readable string.
+func formatFieldType(f reflect.Value) string {
+	// check if field is time.Duration type and format accordingly
+	if f.Type().String() == "time.Duration" {
+		return "duration"
+	}
+
+	return f.Type().String()
 }

@@ -73,26 +73,26 @@ func TestProcess(t *testing.T) {
 		{
 			name: "Envs",
 			envs: map[string]string{
-				"TEST_HOST":       "test-http",
-				"TEST_PORT":       "8081",
-				"TEST_DB":         "test-db",
-				"TEST_HTTP_HOST":  "test-http-host",
-				"TEST_API_KEY":    "test-api-key",
-				"TEST_API_URL":    "test-api-url",
-				"TEST_API_SECRET": "someSecret",
+				"HOST":       "http",
+				"PORT":       "8081",
+				"DB":         "db",
+				"HTTP_HOST":  "http-host",
+				"API_KEY":    "api-key",
+				"API_URL":    "api-url",
+				"API_SECRET": "someSecret",
 			},
 			args:    []string{},
 			mutator: nil,
 			want: conf{
-				Host: "test-http",
+				Host: "http",
 				Port: 8081,
-				DB:   "test-db",
+				DB:   "db",
 				HTTP: HTTP{
-					Host: "test-http-host",
+					Host: "http-host",
 				},
 				Embedded: Embedded{
-					ApiKey:    "test-api-key",
-					ApiUrl:    "test-api-url",
+					ApiKey:    "api-key",
+					ApiUrl:    "api-url",
 					ApiSecret: "someSecret",
 				},
 			},
@@ -100,18 +100,18 @@ func TestProcess(t *testing.T) {
 		{
 			name:    "Flags",
 			envs:    map[string]string{},
-			args:    []string{"conf.test", "--host", "test-http", "--port", "8081", "--db", "test-db", "--http-host", "test-http-host", "--api-key", "test-api", "--api-url", "test-api-url", "--api-secret", "someSecret"},
+			args:    []string{"conf.test", "--host", "http", "--port", "8081", "--db", "db", "--http-host", "http-host", "--api-key", "api", "--api-url", "api-url", "--api-secret", "someSecret"},
 			mutator: nil,
 			want: conf{
-				Host: "test-http",
+				Host: "http",
 				Port: 8081,
-				DB:   "test-db",
+				DB:   "db",
 				HTTP: HTTP{
-					Host: "test-http-host",
+					Host: "http-host",
 				},
 				Embedded: Embedded{
-					ApiKey:    "test-api",
-					ApiUrl:    "test-api-url",
+					ApiKey:    "api",
+					ApiUrl:    "api-url",
 					ApiSecret: "someSecret",
 				},
 			},
@@ -119,26 +119,26 @@ func TestProcess(t *testing.T) {
 		{
 			name: "Envs and Flags",
 			envs: map[string]string{
-				"TEST_HOST":       "test-http-env",
-				"TEST_PORT":       "8080",
-				"TEST_DB":         "test-db-env",
-				"TEST_HTTP_HOST":  "test-http-host-env",
-				"TEST_API_KEY":    "test-api-key-env",
-				"TEST_API_URL":    "test-api-url-env",
+				"HOST":            "http-env",
+				"PORT":            "8080",
+				"DB":              "db-env",
+				"HTTP_HOST":       "http-host-env",
+				"API_KEY":         "api-key-env",
+				"TEST_API_URL":    "api-url-env",
 				"TEST_API_SECRET": "SomeSecret-Env",
 			},
-			args:    []string{"conf.test", "--host", "test-host-flag", "--port", "8081", "--http-host", "test-http", "--api-key", "test-api", "--api-url", "test-api", "--api-secret", "someSecret"},
+			args:    []string{"conf.test", "--host", "host-flag", "--port", "8081", "--http-host", "http", "--api-key", "api", "--api-url", "api", "--api-secret", "someSecret"},
 			mutator: nil,
 			want: conf{
-				Host: "test-host-flag",
+				Host: "host-flag",
 				Port: 8081,
-				DB:   "test-db-env",
+				DB:   "db-env",
 				HTTP: HTTP{
-					Host: "test-http",
+					Host: "http",
 				},
 				Embedded: Embedded{
-					ApiKey:    "test-api",
-					ApiUrl:    "test-api",
+					ApiKey:    "api",
+					ApiUrl:    "api",
 					ApiSecret: "someSecret",
 				},
 			},
@@ -146,26 +146,26 @@ func TestProcess(t *testing.T) {
 		{
 			name: "Mutator",
 			envs: map[string]string{
-				"TEST_HOST":       "test-http-env",
-				"TEST_PORT":       "8080",
-				"TEST_DB":         "test-db-env",
-				"TEST_HTTP_HOST":  "test-http-host-env",
-				"TEST_API_KEY":    "test-api-key",
-				"TEST_API_URL":    "test-api-url",
-				"TEST_API_SECRET": "someSecret",
+				"HOST":       "http-env",
+				"PORT":       "8080",
+				"DB":         "db-env",
+				"HTTP_HOST":  "http-host-env",
+				"API_KEY":    "api-key",
+				"API_URL":    "api-url",
+				"API_SECRET": "someSecret",
 			},
 			args:    nil,
 			mutator: []config.MutatorFunc{mutateValue},
 			want: conf{
 				Host: "mutated-host",
 				Port: 8080,
-				DB:   "test-db-env",
+				DB:   "db-env",
 				HTTP: HTTP{
 					Host: "mutated-http-host",
 				},
 				Embedded: Embedded{
-					ApiKey:    "test-api-key",
-					ApiUrl:    "test-api-url",
+					ApiKey:    "api-key",
+					ApiUrl:    "api-url",
 					ApiSecret: "someSecret",
 				},
 			},
@@ -184,7 +184,7 @@ func TestProcess(t *testing.T) {
 			f := func(t *testing.T) {
 				os.Args = tt.args
 				var cfg conf
-				if err := config.Process("TEST", &cfg, tt.mutator...); err != nil {
+				if err := config.Process(&cfg, tt.mutator...); err != nil {
 					t.Fatalf("\t%s\tShould be able to process the conf struct: %v", failed, err)
 				}
 				t.Logf("\t%s\tShould be able to process the conf struct.", success)

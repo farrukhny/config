@@ -11,20 +11,18 @@ type env struct {
 }
 
 // newEnvSource returns a new Parser that can be used to process the conf struct with environment variables.
-func newEnvSource(prefix string) source {
-	if prefix != "" {
-		prefix = strings.ToUpper(prefix) + "_"
-	}
-
+func newEnvSource() source {
 	// iterate over os.Environ and store the environment variables in a map
 	m := make(map[string]string)
 	for _, e := range os.Environ() {
-		if !strings.HasPrefix(e, prefix) {
+		// split the environment variable by "=" sign
+		pair := strings.SplitN(e, "=", 2)
+		// if the length of the pair is not equal to 2 then skip it
+		if len(pair) != 2 {
 			continue
 		}
-
-		idx := strings.Index(e, "=")
-		m[strings.ToUpper(strings.TrimPrefix(e[:idx], prefix))] = e[idx+1:]
+		// store the environment variable in the map
+		m[pair[0]] = pair[1]
 	}
 
 	return &env{m: m}

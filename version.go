@@ -68,17 +68,23 @@ func (v Version) VersionInfo() string {
 	// build version info in the table format to make it easy to read
 	var versionInfo strings.Builder
 	tb := tabwriter.NewWriter(&versionInfo, 0, 0, 2, ' ', tabwriter.TabIndent)
+	// nolint: errcheck
 	tb.Write([]byte("Version:\t" + v.Version() + "\n"))
 	if v.CommitHash != "" {
+		// nolint: errcheck
 		tb.Write([]byte("Commit Hash:\t" + v.CommitHash + "\n"))
+
 	}
 	if v.Branch != "" {
+		// nolint: errcheck
 		tb.Write([]byte("Branch:\t" + v.Branch + "\n"))
 	}
 	if !v.BuildTime.IsZero() {
+		// nolint: errcheck
 		tb.Write([]byte("Build Time:\t" + v.BuildTime.Format(time.RFC3339) + "\n"))
 	}
 	if v.Metadata != "" {
+		// nolint: errcheck
 		tb.Write([]byte(v.Metadata + "\n"))
 	}
 	tb.Flush()

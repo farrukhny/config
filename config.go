@@ -28,13 +28,13 @@ type MutatorFunc func(key, value string) (string, error)
 
 // Process processes the struct with environment variables and command line flags source. It also
 // accepts mutator function to mutate the value before it is set to the field.
-func Process(prefix string, cfg interface{}, mutator ...MutatorFunc) error {
+func Process(cfg interface{}, mutator ...MutatorFunc) error {
 	var args []string
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
 	}
 
-	return parseWithDefaultSource(prefix, args, cfg, mutator...)
+	return parseWithDefaultSource(args, cfg, mutator...)
 }
 
 // ProcessWithParser processes the struct with the given parsers. After processing with the parsers
@@ -51,7 +51,7 @@ func ProcessWithParser(prefix string, cfg interface{}, parsers []Parser, mutator
 		return err
 	}
 
-	return parseWithDefaultSource(prefix, args, cfg, mutator...)
+	return parseWithDefaultSource(args, cfg, mutator...)
 }
 
 // processWithParser processes the struct with the given parsers.
@@ -105,13 +105,13 @@ func processWithSource(f Field, source []source, mutator ...MutatorFunc) error {
 
 // parseWithDefaultSource parses the struct with environment variables and command line flags source.
 // It also accepts mutator function to mutate the value before it is set to the field.
-func parseWithDefaultSource(prefix string, args []string, cfg interface{}, mutator ...MutatorFunc) error {
+func parseWithDefaultSource(args []string, cfg interface{}, mutator ...MutatorFunc) error {
 	flag, err := newFlagParser(args)
 	if err != nil {
 		return err
 	}
 
-	sources := []source{newEnvSource(prefix), flag}
+	sources := []source{newEnvSource(), flag}
 
 	fields, err := extractFields(nil, cfg)
 	if err != nil {
