@@ -13,7 +13,7 @@ go get github.com/farrukhny/config
 
 ## Usage
 
-### Tags
+#### Tags
 
 The `config` package uses struct tags to specify configuration options. Here are the available tags:
 
@@ -27,18 +27,75 @@ The `config` package uses struct tags to specify configuration options. Here are
 - `mask`: Specifies whether the field value should be masked in the output.
 
 
-### Processing Configuration
+### Defining Configuration Struct
 
-The `Process` function processes a struct with environment variables and command line flags as the source. It accepts a prefix string that is used as a prefix for environment variables, a cfg interface{} representing the configuration struct, and optional mutator functions that mutate the value before setting it to the field.
+First, define a struct that represents your application's configuration settings. You can use struct tags to specify environment variable names, default values, and more.
+```go
+type AppConfig struct {
+    Port     int    `env:"APP_PORT" default:"8080" usage:"Port number"`
+    LogLevel string `env:"LOG_LEVEL" default:"info" usage:"Log level"`
+    // ... other configuration fields
+}
+```
+
+### Loading Configuration
+
+Load the configuration using the `config.Process` function. It will read environment variables and command-line flags, applying any specified mutators.
+
+#### Basic Usage:
 
 ```go
 func Process(cfg interface{}, mutator ...MutatorFunc) error
 ```
 
-The `ProcessWithParser` function processes the struct with the given parsers, followed by environment variables and command line flags as the source. It accepts a prefix string, a cfg interface{} representing the configuration struct, an array of parsers, and optional mutator functions.
+```go
+func main() {
+    var cfg AppConfig
+    err := config.Process(&cfg)
+    if err != nil {
+        // Handle error
+    }
+
+    // Your application logic using cfg
+}
+```
+
+### Using Parsers
+
+You can also use custom parsers to load configuration from different sources, such as files or remote services. Create parsers that implement the `config.Parser` interface.
+
+```go
+type Parser interface {
+    Parse(cfg interface{}) error
+}
+```
+```go
+type FileParser struct {
+    FilePath string
+}
+
+func (p *FileParser) Parse(cfg interface{}) error {
+    // Read configuration from file and populate cfg
+    return nil
+}
+```
+
+Then, use the `config.ProcessWithParser` function:
 
 ```go
 func ProcessWithParser(cfg interface{}, parsers []Parser, mutator ...MutatorFunc) error
+```
+
+```go
+func main() {
+    var cfg AppConfig
+    err := config.ProcessWithParser(&cfg, []config.Parser{&FileParser{FilePath: "config.json"}})
+    if err != nil {
+        // Handle error
+    }
+
+    // Your application logic using cfg
+}
 ```
 
 ### Custom Decoders
@@ -51,67 +108,47 @@ type Decoder interface {
 }
 ```
 
-### Parsers
-
-The `Parser` interface declares the `Parse` method, which can be implemented to extend the functionality of the parsers used to unmarshal the config.
+#### Example Usage
 
 ```go
-type Parser interface {
-    Parse(cfg interface{}) error
+import (
+    "encoding/base64"
+)
+
+type Base64Decoder struct{}
+
+func (d *Base64Decoder) Decode(val string) error {
+    decoded, err := base64.StdEncoding.DecodeString(val)
+    if err != nil {
+        return err
+    }
+    
+    // Use the decoded value
+    // e.g., return the decoded value or set it to a field
+
+    return nil
 }
-```
 
-### Source
-
-The `source` interface declares the `Source` method, which is used to load the configuration from environment variables and command line flags. The Source method accepts a `Field` struct.
-
-```go
-type source interface {
-    Source(f Field) (string, bool)
-}
 ```
 
 ### Mutator Functions
 
 The `MutatorFunc` is a function type that mutates a value of a key before it is set to the field.
+for example, pulling secrets from a secret manager and setting them to the configuration struct.
 
 ```go
 type MutatorFunc func(key, value string) (string, error)
 ```
 
-### Example Usage
+#### Example Usage
 
 ```go
-
-package main
-
-import (
-	"fmt"
-
-	"github.com/example/config"
-)
-
-type Config struct {
-	Host     string `env:"HOST" flag:"host" default:"localhost" usage:"Server host"`
-	Port     int    `env:"PORT" flag:"port" default:"8080" usage:"Server port"`
-	Username string `env:"USERNAME" flag:"username" required:"true" usage:"Username"`
-	Password string `env:"PASSWORD" flag:"password" mask:"true" usage:"Password"`
+func secretMutator(key, value string) (string, error) {
+// Retrieve secret using the key and any necessary logic
+secretValue, err := retrieveSecretFromManager(key)
+    if err != nil {
+        return "", err
+    }
+    return secretValue, nil
 }
-
-func main() {
-	var cfg Config
-
-	err := config.Process(&cfg)
-	if err != nil {
-		fmt.Println("Error processing configuration:", err)
-		return
-	}
-
-	fmt.Println("Host:", cfg.Host)
-	fmt.Println("Port:", cfg.Port)
-	fmt.Println("Username:", cfg.Username)
-	fmt.Println("Password:", cfg.Password)
-}
-
 ```
-

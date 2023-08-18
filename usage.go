@@ -32,8 +32,8 @@ Global Options:
 	{{ printf "\t -v," }}{{ printf "\t--version" }}{{ printf "\tshow version" }}
 `
 
-// GenerateUsageMessage generates the usage message.
-func GenerateUsageMessage(cfg interface{}) (string, error) {
+// UsageMessage generates the usage message.
+func UsageMessage(cfg interface{}) (string, error) {
 	usage, err := extractFields(nil, cfg)
 	if err != nil {
 		return "", err
@@ -68,8 +68,8 @@ func GenerateUsageMessage(cfg interface{}) (string, error) {
 	return sb.String(), nil
 }
 
-// GenerateStartupMessage generates the startup message.
-func GenerateStartupMessage(cfg interface{}) (string, error) {
+// StartupMessage generates the startup message.
+func StartupMessage(cfg interface{}) (string, error) {
 	cfgUsage, err := extractFields(nil, cfg)
 	if err != nil {
 		return "", err
@@ -86,8 +86,8 @@ func GenerateStartupMessage(cfg interface{}) (string, error) {
 	return sb.String(), nil
 }
 
-// GenerateJSONStartupMessage generates the startup message in JSON format.
-func GenerateJSONStartupMessage(cfg interface{}) (string, error) {
+// JSONStartupMessage generates the startup message in JSON format.
+func JSONStartupMessage(cfg interface{}) (string, error) {
 	cfgUsage, err := extractFields(nil, cfg)
 	if err != nil {
 		return "", err

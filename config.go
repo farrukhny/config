@@ -1,3 +1,5 @@
+// Package config provides functionality for loading and processing configuration values
+// from environment variables and command line flags. It offers support for custom decoders, parsers, and mutators.
 package config
 
 import (
@@ -40,7 +42,7 @@ func Process(cfg interface{}, mutator ...MutatorFunc) error {
 // ProcessWithParser processes the struct with the given parsers. After processing with the parsers
 // it will process the struct with environment variables and command line flags source.
 // It also accepts mutator function to mutate the value before it is set to the field.
-func ProcessWithParser(prefix string, cfg interface{}, parsers []Parser, mutator ...MutatorFunc) error {
+func ProcessWithParser(cfg interface{}, parsers []Parser, mutator ...MutatorFunc) error {
 	var args []string
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
