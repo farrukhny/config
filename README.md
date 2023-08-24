@@ -3,6 +3,7 @@
 [![Go](https://github.com/farrukhny/config/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/farrukhny/config/actions/workflows/go.yml)
 [![go.mod Go version](https://img.shields.io/github/go-mod/go-version/farrukhny/config)](https://github.com/farrukhny/config)
 [![Go Report Card](https://goreportcard.com/badge/github.com/farrukhny/config)](https://goreportcard.com/report/github.com/farrukhny/config)
+[![Go Reference](https://pkg.go.dev/badge/github.com/farrukhny/config.svg)](https://pkg.go.dev/github.com/farrukhny/config)
 
 The config package provides functionality for loading and processing configuration values from environment variables and command line flags. It offers support for custom decoders, parsers, and mutators.
 

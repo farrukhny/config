@@ -1,5 +1,3 @@
-// Package config provides functionality for loading and processing configuration values
-// from environment variables and command line flags. It offers support for custom decoders, parsers, and mutators.
 package config
 
 import (
